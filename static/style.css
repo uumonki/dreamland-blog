@@ -1,0 +1,149 @@
+@charset "utf-8";
+/* CSS Document */
+
+body {
+    height: 100%;
+    background: linear-gradient(90deg, #303077 50%, #daffde 50%);
+	font-family: baskerville;
+	font-size: 12pt;
+}
+
+a {
+	text-decoration: none;
+}
+
+.header {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 200px;
+    background: linear-gradient(90deg, #303077 50%, #daffde 50%);
+	z-index: 100;
+}
+
+.header-left, .header-right {
+	position: absolute;
+	top: 0px;
+	width: 50%;
+	height: 100%;
+}
+
+.header-left {
+	color: white;
+	left: 0px;
+}
+
+.header-right {
+	color: black;
+	right: 0px;
+}
+
+.name {
+	font-size: 15pt;
+	position: fixed;
+	top: 15px;
+}
+
+.header-left .name {
+	left: 15px;
+}
+
+.header-right .name {
+	right: 15px;
+}
+
+.title {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	font-weight: bold;
+	font-size: 24pt;
+}
+
+.header-left .title {
+	color: white;
+	right: 0px;
+	padding-right: 5px;
+}
+
+.header-right .title {
+	color: black;
+	left: 0px;
+	padding-left: 3px;
+}
+
+.body {
+	margin-top: 200px;
+	z-index: -1;
+}
+
+.entry {
+	position: relative;
+	width: 100%;
+	margin-bottom: 85px;
+	display: table;
+}
+
+.wrapper {
+	width: calc(45% - 100px);
+	max-width: 700px;
+	padding: 0px 50px;
+	display: table-row;
+}
+
+.wrapper.left {
+	align-content: right;
+	text-align: right;
+	float: right;
+	color: white;
+	transform: translateX(-50vw)
+}
+
+.wrapper.right {
+	align-content: left;
+	text-align: left;
+	float: left;
+	color: black;
+	transform: translateX(50vw)
+}
+
+.date {
+	font-size: 16pt;
+	margin-bottom: 15px;
+}
+
+.conclusion {
+	font-style: italic;
+	letter-spacing: 0.5px;
+	display: inline-block;
+	margin-top: 12px;
+}
+
+.icons {
+	display: inline-block;
+	margin: 0px 4px;
+	transform: translateY(3px);
+}
+
+.icon {
+	width: 20px;
+	margin-left: 2px;
+}
+
+@font-face {
+  font-family: baskerville;
+  src: url("fonts/LibreBaskerville-Regular.ttf");
+}
+
+@font-face {
+  font-family: baskerville;
+  src: url("fonts/LibreBaskerville-Bold.ttf");
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: baskerville;
+  src: url("fonts/LibreBaskerville-Italic.ttf");
+  font-style: italic;
+}

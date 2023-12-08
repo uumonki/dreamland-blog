@@ -1,2 +1,5 @@
 .env
 **/*.db
+**/*.sqlite
+**/*.sqlite3
+**/*.csv
