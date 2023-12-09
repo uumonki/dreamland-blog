@@ -1,34 +1,35 @@
-<!doctype html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css">
-    <title>dreamland - a dream blog</title>
-    <link rel="icon" href="{{ url_for('static', filename='icon.ico') }}">
-</head>
-<body>
-    <div class="header">
-        <div class="header-left">
-            <div class="name">
-                lilian
-            </div>
-            <a class="title" href="https://www.youtube.com/watch?v=BE7vBk_zLA4" target="_blank">
-                dream
-            </a>
+{% extends "home.html" %}
+
+{% block body %}
+    <div class="entry">
+        <div class="wrapper left">
+            <div class="date">dec 9, 2023</div>
+            <div class="content">welcome to our dream blog! please log in to view the content.</div>
         </div>
-        <div class="header-right">
-            <div class="name">
-                yusuke
+        <div class="wrapper right">
+            <div class="date">dec 9, 2023</div>
+            <div class="content"><a href="/login">click here</a> to login.</div>
+            <div class="conclusion">enjoyment: </div>
+            <div class="icons">
+                <img alt="☾" src="{{ url_for('static', filename='imoon.png') }}" class="icon">
             </div>
-            <a class="title" href="https://www.youtube.com/watch?v=BE7vBk_zLA4" target="_blank">
-                land
-            </a>
+            <div class="conclusion">.</div>
         </div>
     </div>
-    <div class="body">
-        <h1>Welcome to My Blog</h1>
-        <p>Please log in to view content.</p>
-        <a href="/login">Login with Google</a>
+    <div class="entry">
+        <div class="wrapper right">
+            <div class="date">dec 2, 2023</div>
+            <div class="content">some sort of intro or description here would be nice.</div>
+            <div class="conclusion">enjoyment: </div>
+            <div class="icons">
+                <img alt="☾" src="{{ url_for('static', filename='imoon.png') }}" class="icon">
+                <img alt="☾" src="{{ url_for('static', filename='imoon.png') }}" class="icon">
+                <img alt="☾" src="{{ url_for('static', filename='imoon.png') }}" class="icon">
+                <img alt="☾" src="{{ url_for('static', filename='imoon.png') }}" class="icon">
+                <img alt="☾" src="{{ url_for('static', filename='imoon.png') }}" class="icon">
+            </div>
+            <div class="conclusion">.</div>
+        </div>
     </div>
-</body>
-</html>
+{% endblock %}
+

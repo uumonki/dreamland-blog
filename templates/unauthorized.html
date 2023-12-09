@@ -1,14 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Logged In</title>
-</head>
-<body>
-    <h1>Welcome to My Blog</h1>
-    <div>
-        You are NOT AUTHORIZED to view this page.
-    </div>
+{% extends "home.html" %}
+
+{% block extra_links %}
     <a href="/logout">Logout</a>
-</body>
-</html>
+{% endblock %}
+
+{% block body %}
+    <div class="entry">
+        <div class="wrapper left">
+            <div class="date">dec 9, 2023</div>
+            <div class="content">OOPS.</div>
+        </div>
+        <div class="wrapper right">
+            <div class="date">dec 9, 2023</div>
+            <div class="content">looks like you're not been authorized to view the content. this doesn't (yet!) mean you're not our friend -- contact us, and we'll give you access. we just don't want EVERYONE on the internet staring into our inner minds.</div>
+            <div class="conclusion">enjoyment: </div>
+            <div class="icons">
+                <img alt="☾" src="{{ url_for('static', filename='imoon.png') }}" class="icon">
+            </div>
+            <div class="conclusion">.</div>
+        </div>
+    </div>
+{% endblock %}
+
+

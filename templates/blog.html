@@ -1,0 +1,36 @@
+{% extends "home.html" %}
+
+{% block extra_links %}
+    <a href="/logout">Logout</a> 
+    {% if admin %}
+    <a href="/create-post">Add post</a> <a href="/manage-access">Manage access</a>
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    {% for date, posts in posts.items() %}
+    <div class="entry">
+        {% for side in ['left', 'right'] %}
+            {% if posts[side] %}
+            {% set post = posts[side] %}
+            <div class="wrapper {{ side }}">
+                <div class="date">
+                    {{ date }}
+                </div>
+                <div class="content">
+                    {{ post.content }}
+                </div>
+                <div class="conclusion">enjoyment: </div>
+                <div class="icons">
+                    {% set icon_file = 'i' if post.author else '' %}
+                    {% for _ in range(post.rating) %}
+                        <img alt="☾" src="{{ url_for('static', filename=icon_file ~ 'moon.png') }}" class="icon">
+                    {% endfor %}
+                </div>
+                <div class="conclusion">.</div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endfor %}
+{% endblock %}

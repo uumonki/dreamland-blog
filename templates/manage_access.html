@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">  
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css">
+    <title>dreamland - manage access</title>
+    <link rel="icon" href="{{ url_for('static', filename='icon.ico') }}">
+</head>
+<body>
+    <form method="get">
+        <input type="text" name="search_email" placeholder="Search by email">
+        <input type="submit" value="Search">
+    </form>
+
+    <table>
+        <tr>
+            <th>Email</th>
+            <th>Authorized by Admin1</th>
+            <th>Authorized by Admin2</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.email }}</td>
+            {% for i in range(2) %}
+            <td>
+                <input type="checkbox" onclick="toggleAuthorization({{ user.id }}, {{ i }}, this.checked)"
+                       {% if admin_index != i %}disabled{% endif %}
+                       {% if (i == 0 and user.authorized0) or (i == 1 and user.authorized1) %}checked{% endif %}>
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+
+    <script>
+    function toggleAuthorization(userId, adminIndex, newState) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "/update-authorization", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = function () {
+            if (this.readyState === XMLHttpRequest.DONE) {
+                if (this.status !== 200) {
+                    window.location.reload();  // Reload the page on error
+                }
+            }
+        }
+        xhr.send(JSON.stringify({userId: userId, adminIndex: adminIndex, newState: newState}));
+    }
+    </script>
+</body>
+</html>

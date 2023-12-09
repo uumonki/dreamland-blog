@@ -10,6 +10,7 @@ body {
 
 a {
 	text-decoration: none;
+	color: gray;
 }
 
 .header {
@@ -81,13 +82,13 @@ a {
 .entry {
 	position: relative;
 	width: 100%;
-	margin-bottom: 85px;
+	margin-bottom: 65px;
 	display: table;
 }
 
 .wrapper {
 	width: calc(45% - 100px);
-	max-width: 700px;
+	max-width: 600px;
 	padding: 0px 50px;
 	display: table-row;
 }

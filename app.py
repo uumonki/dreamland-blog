@@ -1,9 +1,11 @@
-from flask import Flask, render_template, session, redirect, url_for, request
+from flask import Flask, render_template, session, redirect, url_for, request, jsonify, abort
 from authlib.integrations.flask_client import OAuth
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import validates
 
 from collections import defaultdict
 from datetime import datetime
+from functools import wraps
 import os
 
 from dotenv import load_dotenv
@@ -16,6 +18,13 @@ db = SQLAlchemy(app)
 
 ADMIN_EMAILS = os.getenv('ADMIN_EMAILS').split(',')
 
+USER_LEVELS = {
+    'logged_out': 0,
+    'unauthorized': 1,
+    'visitor': 2,
+    'admin': 3
+}
+
 class BlogPost(db.Model):
     __tablename__ = 'entries'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
@@ -24,11 +33,27 @@ class BlogPost(db.Model):
     content = db.Column(db.Text, nullable=False)
     rating = db.Column(db.Integer, nullable=False)
 
-# Database model for authorized users
-class AuthorizedVisitor(db.Model):
-    __tablename__ = 'visitors'
+    @validates('rating')
+    def validate_rating(self, key, rating):
+        assert 0 <= rating <= 50
+        return rating
+    
+    @validates('content')
+    def validate_content(self, key, content):
+        assert content.strip()
+        return content
+    
+    @validates('date')
+    def validate_date(self, key, date):
+        assert datetime.strptime(date, '%Y-%m-%d')
+        return date
+
+class User(db.Model):
+    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True, nullable=False)
+    authorized0 = db.Column(db.Boolean, nullable=False)
+    authorized1 = db.Column(db.Boolean, nullable=False)
 
 # OAuth 2 client setup
 oauth = OAuth(app)
@@ -43,7 +68,39 @@ google = oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
 )
 
-def render_blog_posts(user_type):
+def get_or_create_user_in_database(user_email):
+    user = User.query.filter_by(email=user_email).first()
+    if user is None:
+        user = User(email=user_email, authorized0=False, authorized1=False)
+        db.session.add(user)
+        db.session.commit()
+    return user
+
+def get_user_level():
+    user_email = session.get('user_email')
+    if user_email is None:
+        return USER_LEVELS['logged_out']
+    user = get_or_create_user_in_database(user_email)
+    if user_email in ADMIN_EMAILS:
+        return USER_LEVELS['admin']
+    if user.authorized0 and user.authorized1:
+        return USER_LEVELS['visitor']
+    else:
+        return USER_LEVELS['unauthorized']
+
+def requires_user_level(level):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            user_level = get_user_level()
+            if user_level < level:
+                abort(403)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+@requires_user_level(USER_LEVELS['visitor'])
+def render_blog_posts():
     posts = BlogPost.query.order_by(BlogPost.date.desc()).all()
     
     # Group posts by date
@@ -60,31 +117,18 @@ def render_blog_posts(user_type):
             post.formatted_date = formatted_date
             organized_posts[formatted_date][side] = post
 
-    return render_template('posts.html', posts=organized_posts)
-
-def is_admin():
-    return session.get('user_email') in ADMIN_EMAILS
+    admin = get_user_level() >= USER_LEVELS['admin']
+    return render_template('blog.html', posts=organized_posts, admin=admin)
 
 @app.route('/')
 def homepage():
-    user_email = session.get('user_email')
-    
-    # Check if user is logged in
-    if user_email:
-        # Check if user is admin
-        if user_email in ADMIN_EMAILS:
-            return render_blog_posts('admin')
-        
-        # Check if user is in the list of authorized users
-        elif AuthorizedVisitor.query.filter_by(email=user_email).first():
-            return render_blog_posts('visitor')
-        
-        # User not authorized
-        else:
-            return render_template('unauthorized.html')
-
-    # User not logged in
-    return render_template('login.html')
+    user_level = get_user_level()
+    if user_level == USER_LEVELS['logged_out']:
+        return render_template('login.html')
+    elif user_level == USER_LEVELS['unauthorized']:
+        return render_template('unauthorized.html')
+    elif user_level >= USER_LEVELS['visitor']:
+        return render_blog_posts()
 
 @app.route('/login')
 def login():
@@ -100,52 +144,85 @@ def authorize():
     except Exception as e:
         # Log the error and inform the user
         print(f"Authentication error: {e}")
-        return redirect(url_for('auth_error'))
+        # something like https://idp.shibboleth.ox.ac.uk/idp/profile/SAML2/Redirect/SSO?execution=e1s1
+        return render_template('auth_error.html'), 400
 
     user_info = google.get('userinfo').json()
     session['user_email'] = user_info.get('email')
     return redirect('/')
-
-@app.route('/auth-error')
-def auth_error():
-    return render_template('auth_error.html')
 
 @app.route('/logout')
 def logout():
     session.pop('user_email', None)
     return redirect('/')
 
-@app.route('/add-post', methods=['GET', 'POST'])
-def add_post():
-    if not is_admin():
-        return render_template('access_denied.html'), 403
-
+@app.route('/create-post', methods=['GET', 'POST'])
+@requires_user_level(USER_LEVELS['admin'])
+def create_post():
     if request.method == 'POST':
         data = request.form
         author = ADMIN_EMAILS.index(session.get('user_email')) != 0
-        new_post = BlogPost(
-            author=author,
-            rating=int(data.get('rating')),
-            content=data.get('text'),
-            date=datetime.strptime(data.get('date'), '%Y-%m-%d').date()
-        )
+        try:
+            new_post = BlogPost(
+                author=author,
+                rating=int(data.get('rating')),
+                content=data.get('text'),
+                date=datetime.strptime(data.get('date'), '%Y-%m-%d').date()
+            )
+        except Exception as e:
+            print(f"Error creating post: {e}")
+            return redirect('/')
         db.session.add(new_post)
         db.session.commit()
-        print(new_post)
         return redirect('/')
 
     today = datetime.today().strftime('%Y-%m-%d')
-    return render_template('add_post.html', today=today)
+    return render_template('create_post.html', today=today)
 
-# Route to manage authorized users (for simplicity, shown without authentication)
-@app.route('/manage-users')
-def manage_users():
-    # Fetch all authorized users
-    users = AuthorizedVisitor.query.all()
-    # Render a page to manage users
-    # You'll need to create a template 'manage_users.html' for this
-    return render_template('manage_users.html', users=users)
+@app.route('/manage-access')
+@requires_user_level(USER_LEVELS['admin'])
+def manage_access():
+    admin_index = ADMIN_EMAILS.index(session.get('user_email'))
 
+    ''' if request.method == 'POST':
+        user_id = request.form.get('user_id')
+        new_auth_state = request.form.get('auth_state') == 'on'
+        auth_field = f'authorized{admin_index}'
+        user = User.query.get(int(user_id))
+        if user:
+            setattr(user, auth_field, new_auth_state)
+            db.session.commit()
+        return redirect(url_for('manage_access'))'''
+
+    search_query = request.args.get('search_email', '')
+    users = User.query.filter(User.email.contains(search_query)).all()
+
+    return render_template('manage_access.html', users=users, admin_index=admin_index)
+
+@app.route('/update-authorization', methods=['POST'])
+@requires_user_level(USER_LEVELS['admin'])
+def update_authorization():
+    admin_index = ADMIN_EMAILS.index(session.get('user_email'))
+
+    data = request.json
+    user_id = data['userId']
+    new_state = data['newState']
+
+    user = User.query.get(user_id)
+    if user:
+        auth_field = f'authorized{admin_index}'
+        setattr(user, auth_field, new_state)
+        db.session.commit()
+        return jsonify({'status': 'success'})
+    return jsonify({'status': 'error'})
+
+@app.errorhandler(404)
+def not_found(e):
+  return "404 not found :(", 404
+
+@app.errorhandler(403)
+def not_found(e):
+  return "403 forbidden :(", 403
 
 if __name__ == '__main__':
     with app.app_context():

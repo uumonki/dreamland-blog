@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Blog Post</title>
+</head>
+<body>
+    <h1>Add New Blog Post</h1>
+    <form method="POST" action="/create-post">
+        <label for="rating">Rating:</label><br>
+        <input type="number" id="rating" name="rating" required min="0" max="50" value="1"><br>
+        <label for="date">Date:</label><br>
+        <input type="date" id="date" name="date" required value="{{ today }}"><br>
+        <label for="text">Text:</label><br>
+        <textarea id="text" name="text" required></textarea><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+<script>
+    document.querySelector('form').addEventListener('submit', function(event) {
+        var textArea = document.getElementById('text');
+        if (!textArea.value.trim()) {
+            textArea.style.borderColor = 'red'; // Highlight the textarea border in red
+            event.preventDefault(); // Prevent form submission
+        } else {
+            textArea.style.borderColor = ''; // Reset the border color if the text is valid
+        }
+    });
+</script>
+</html>
