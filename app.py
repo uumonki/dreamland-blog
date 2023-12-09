@@ -20,7 +20,7 @@ ADMIN_EMAILS = os.getenv('ADMIN_EMAILS').split(',')
 
 USER_LEVELS = {
     'logged_out': 0,
-    'unauthorized': 1,
+    'non_user': 1,
     'visitor': 2,
     'admin': 3
 }
@@ -86,7 +86,7 @@ def get_user_level():
     if user.authorized0 and user.authorized1:
         return USER_LEVELS['visitor']
     else:
-        return USER_LEVELS['unauthorized']
+        return USER_LEVELS['non_user']
 
 def requires_user_level(level):
     def decorator(func):
@@ -125,8 +125,8 @@ def homepage():
     user_level = get_user_level()
     if user_level == USER_LEVELS['logged_out']:
         return render_template('login.html')
-    elif user_level == USER_LEVELS['unauthorized']:
-        return render_template('unauthorized.html')
+    elif user_level == USER_LEVELS['non_user']:
+        return render_template('non_user.html')
     elif user_level >= USER_LEVELS['visitor']:
         return render_blog_posts()
 
@@ -145,7 +145,7 @@ def authorize():
         # Log the error and inform the user
         print(f"Authentication error: {e}")
         # something like https://idp.shibboleth.ox.ac.uk/idp/profile/SAML2/Redirect/SSO?execution=e1s1
-        return render_template('auth_error.html'), 400
+        return render_template('error/auth_error.html'), 400
 
     user_info = google.get('userinfo').json()
     session['user_email'] = user_info.get('email')
@@ -177,27 +177,17 @@ def create_post():
         return redirect('/')
 
     today = datetime.today().strftime('%Y-%m-%d')
-    return render_template('create_post.html', today=today)
+    return render_template('admin/create_post.html', today=today)
 
 @app.route('/manage-access')
 @requires_user_level(USER_LEVELS['admin'])
 def manage_access():
     admin_index = ADMIN_EMAILS.index(session.get('user_email'))
 
-    ''' if request.method == 'POST':
-        user_id = request.form.get('user_id')
-        new_auth_state = request.form.get('auth_state') == 'on'
-        auth_field = f'authorized{admin_index}'
-        user = User.query.get(int(user_id))
-        if user:
-            setattr(user, auth_field, new_auth_state)
-            db.session.commit()
-        return redirect(url_for('manage_access'))'''
-
     search_query = request.args.get('search_email', '')
     users = User.query.filter(User.email.contains(search_query)).all()
 
-    return render_template('manage_access.html', users=users, admin_index=admin_index)
+    return render_template('admin/manage_access.html', users=users, admin_index=admin_index)
 
 @app.route('/update-authorization', methods=['POST'])
 @requires_user_level(USER_LEVELS['admin'])
@@ -218,6 +208,7 @@ def update_authorization():
 
 @app.errorhandler(404)
 def not_found(e):
+  # TODO: create error pages
   return "404 not found :(", 404
 
 @app.errorhandler(403)
