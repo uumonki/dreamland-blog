@@ -6,6 +6,7 @@ body {
     background: linear-gradient(90deg, #303077 50%, #daffde 50%);
 	font-family: baskerville;
 	font-size: 12pt;
+	margin: 0;
 }
 
 a {
@@ -31,12 +32,12 @@ a {
 }
 
 .header-left {
-	color: white;
+	color: #daffde;
 	left: 0px;
 }
 
 .header-right {
-	color: black;
+	color: #303077;
 	right: 0px;
 }
 
@@ -63,13 +64,13 @@ a {
 }
 
 .header-left .title {
-	color: white;
+	color: #daffde;
 	right: 0px;
 	padding-right: 5px;
 }
 
 .header-right .title {
-	color: black;
+	color: #303077;
 	left: 0px;
 	padding-left: 3px;
 }
@@ -97,7 +98,8 @@ a {
 	align-content: right;
 	text-align: right;
 	float: right;
-	color: white;
+	color: #daffde;
+	fill: #daffde;
 	transform: translateX(-50vw)
 }
 
@@ -105,7 +107,8 @@ a {
 	align-content: left;
 	text-align: left;
 	float: left;
-	color: black;
+	color: #303077;
+	fill: #303077;
 	transform: translateX(50vw)
 }
 
@@ -132,19 +135,41 @@ a {
 	margin-left: 2px;
 }
 
-@font-face {
-  font-family: baskerville;
-  src: url("fonts/LibreBaskerville-Regular.ttf");
+@media only screen and (max-width: 767px) {
+	.header {
+		height: 150px;
+	}
+
+	.body {
+		margin-top: 150px;
+	}
+	
+	.name {
+		font-size: 11pt;
+	}
+
+	form {
+		font-size: 14pt;
+	}
+
+	.form-label {
+		font-size: 10pt;
+	}
 }
 
 @font-face {
-  font-family: baskerville;
-  src: url("fonts/LibreBaskerville-Bold.ttf");
-  font-weight: bold;
+	font-family: baskerville;
+	src: url("fonts/LibreBaskerville-Regular.ttf");
 }
 
 @font-face {
-  font-family: baskerville;
-  src: url("fonts/LibreBaskerville-Italic.ttf");
-  font-style: italic;
+	font-family: baskerville;
+	src: url("fonts/LibreBaskerville-Bold.ttf");
+	font-weight: bold;
+}
+
+@font-face {
+	font-family: baskerville;
+	src: url("fonts/LibreBaskerville-Italic.ttf");
+	font-style: italic;
 }

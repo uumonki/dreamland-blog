@@ -35,7 +35,7 @@ class BlogPost(db.Model):
 
     @validates('rating')
     def validate_rating(self, key, rating):
-        assert 0 <= rating <= 50
+        assert 0 <= rating <= 30
         return rating
     
     @validates('content')
@@ -45,8 +45,7 @@ class BlogPost(db.Model):
     
     @validates('date')
     def validate_date(self, key, date):
-        assert datetime.strptime(date, '%Y-%m-%d')
-        return date
+        return datetime.strptime(date, '%Y-%m-%d').date()
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -134,6 +133,7 @@ def homepage():
 def login():
     google = oauth.create_client('google')
     redirect_uri = url_for('authorize', _external=True)
+    # TODO: remove select_account after testing
     return google.authorize_redirect(redirect_uri, prompt='select_account')
 
 @app.route('/authorize')
@@ -157,7 +157,7 @@ def logout():
     return redirect('/')
 
 @app.route('/create-post', methods=['GET', 'POST'])
-@requires_user_level(USER_LEVELS['admin'])
+# @requires_user_level(USER_LEVELS['admin'])
 def create_post():
     if request.method == 'POST':
         data = request.form
@@ -167,7 +167,7 @@ def create_post():
                 author=author,
                 rating=int(data.get('rating')),
                 content=data.get('text'),
-                date=datetime.strptime(data.get('date'), '%Y-%m-%d').date()
+                date=data.get('date')
             )
         except Exception as e:
             print(f"Error creating post: {e}")
@@ -218,4 +218,5 @@ def not_found(e):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
+    # app.run(host='0.0.0.0', port=5000)

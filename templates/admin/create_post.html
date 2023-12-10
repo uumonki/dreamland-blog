@@ -1,30 +1,69 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Add Blog Post</title>
+    <meta charset="utf-8">  
+    <link href="{{ url_for('static', filename='admin.css') }}" rel="stylesheet" type="text/css">
+    <title>dreamland - create post</title>
+    <link rel="icon" href="{{ url_for('static', filename='icon.ico') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-    <h1>Add New Blog Post</h1>
+    <div class="header">
+        <div class="title"><a href="/">dreamland</a></div>
+    </div>
     <form method="POST" action="/create-post">
-        <label for="rating">Rating:</label><br>
-        <input type="number" id="rating" name="rating" required min="0" max="50" value="1"><br>
-        <label for="date">Date:</label><br>
-        <input type="date" id="date" name="date" required value="{{ today }}"><br>
-        <label for="text">Text:</label><br>
-        <textarea id="text" name="text" required></textarea><br>
+        <div class="form-group">
+            <div class="form-label">date</div>
+            <div class="form-control date">
+                <input type="date" id="date" name="date" tabindex="1" required value="{{ today }}">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="form-label">rating</div>
+            <div class="form-control rating">
+                <button type="button" class="btn-minus btn-adjust" tabindex="-1"><span class="btn-text">−</span></button>
+                <input type="number" class="rating" id="rating" name="rating" onclick="this.select();" tabindex="2" pattern="\d*" required min="0" max="30" value="0">
+                <button type="button" class="btn-plus btn-adjust" tabindex="-1"><span class="btn-text">+</span></button>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="form-label">content</div>
+            <div class="form-control textbox">
+                <textarea id="text" name="text" tabindex="2" required placeholder="enter here..."></textarea>
+            </div>
+        </div>
+        <input class="btn-submit" tabindex="3" type="submit" value="submit">
+    </form>
+    <!--
+    <form method="POST" action="/create-post">
+        <div class="form-control">
+            <label for="rating">Rating:</label><br>
+            <button type="button" class="btn-minus">-</button>
+            <input type="number" id="rating" name="rating" required min="0" max="30" value="0" readonly>
+            <button type="button" class="btn-plus">+</button>
+        </div>
+        <div class="form-control">
+            <label for="date">Date:</label><br>
+            <button type="button" class="btn-minus">-</button>
+            <input type="date" id="date" name="date" required value="{{ today }}">
+            <button type="button" class="btn-plus">+</button>
+        </div>
+        <div class="form-control">
+            <label for="text">Text:</label><br>
+            <textarea id="text" name="text" required></textarea>
+        </div>
         <input type="submit" value="Submit">
     </form>
+
+        <div class="form-control date">
+            <button type="button" class="btn-minus btn-date">-</button>
+            <span id="date-month" tabindex="0"></span> 
+            <span id="date-day" tabindex="0"></span> 
+            <span id="date-year" tabindex="0"></span>
+            <input type="date" id="date" name="date" required value="{{ today }}" hidden>
+            <button type="button" class="btn-plus btn-date">+</button>
+        </div>        
+    -->
+    <script src="{{ url_for('static', filename='create_post.js') }}"></script>
 </body>
-<script>
-    document.querySelector('form').addEventListener('submit', function(event) {
-        var textArea = document.getElementById('text');
-        if (!textArea.value.trim()) {
-            textArea.style.borderColor = 'red'; // Highlight the textarea border in red
-            event.preventDefault(); // Prevent form submission
-        } else {
-            textArea.style.borderColor = ''; // Reset the border color if the text is valid
-        }
-    });
-</script>
 </html>
