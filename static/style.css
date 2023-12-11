@@ -1,6 +1,10 @@
 @charset "utf-8";
 /* CSS Document */
 
+html, body {
+	overscroll-behavior-y: none;
+}
+
 body {
     height: 100%;
     background: linear-gradient(90deg, #303077 50%, #daffde 50%);
@@ -89,7 +93,7 @@ a {
 
 .wrapper {
 	width: calc(45% - 100px);
-	max-width: 600px;
+	max-width: 550px;
 	padding: 0px 50px;
 	display: table-row;
 }
@@ -126,7 +130,7 @@ a {
 
 .icons {
 	display: inline-block;
-	margin: 0px 4px;
+	margin: 0px 3px;
 	transform: translateY(3px);
 }
 
@@ -135,25 +139,87 @@ a {
 	margin-left: 2px;
 }
 
-@media only screen and (max-width: 767px) {
+@media only screen and (max-width: 992px) {
+	body {
+		font-size: 11pt;
+	}
+
+	.header {
+		height: 180px;
+	}
+
+	.body {
+		margin-top: 180px;
+	}
+	
+	.entry {
+		margin-bottom: 50px;
+	}
+
+	.wrapper {
+		width: calc(45% - 80px);
+		padding: 0px 40px;
+	}
+
+	.name {
+		font-size: 13pt;
+	}
+
+	.date {
+		font-size: 13pt;
+	}
+
+	.icons {
+		transform: translateY(2.5px);
+	}
+
+	.icon {
+		width: 17px;
+		margin-left: 1.5px;
+	}
+}
+
+@media only screen and (max-width: 768px) {
+	body {
+		font-size: 9pt;
+	}
+
 	.header {
 		height: 150px;
+	}
+
+	.title {
+		font-size: 20pt;
 	}
 
 	.body {
 		margin-top: 150px;
 	}
 	
+	.entry {
+		margin-bottom: 30px;
+	}
+
+	.wrapper {
+		width: calc(47% - 56px);
+		padding: 0px 28px;
+	}
+
 	.name {
 		font-size: 11pt;
 	}
 
-	form {
-		font-size: 14pt;
+	.date {
+		font-size: 11pt;
 	}
 
-	.form-label {
-		font-size: 10pt;
+	.icons {
+		transform: translateY(2px);
+	}
+
+	.icon {
+		width: 15px;
+		margin-left: 1px;
 	}
 }
 

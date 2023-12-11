@@ -176,8 +176,7 @@ def create_post():
         db.session.commit()
         return redirect('/')
 
-    today = datetime.today().strftime('%Y-%m-%d')
-    return render_template('admin/create_post.html', today=today)
+    return render_template('admin/create_post.html')
 
 @app.route('/manage-access')
 @requires_user_level(USER_LEVELS['admin'])

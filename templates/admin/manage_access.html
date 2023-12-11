@@ -8,31 +8,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
+    <div class="header">
+        <div class="title"><a href="/">dreamland</a></div>
+    </div>
     <form method="get">
-        <input type="text" name="search_email" placeholder="Search by email">
-        <input type="submit" value="Search">
+        <div class="form-block search-bar">
+            <input type="text" name="search_email" placeholder="search by email">
+            <input type="submit" class="btn-submit" value="Search">
+        </div>
     </form>
-
-    <table>
-        <tr>
-            <th>Email</th>
-            <th>Authorized by Admin1</th>
-            <th>Authorized by Admin2</th>
-        </tr>
-        {% for user in users %}
-        <tr>
-            <td>{{ user.email }}</td>
-            {% for i in range(2) %}
-            <td>
-                <input type="checkbox" onclick="toggleAuthorization({{ user.id }}, this.checked)"
-                       {% if admin_index != i %}disabled{% endif %}
-                       {% if (i == 0 and user.authorized0) or (i == 1 and user.authorized1) %}checked{% endif %}>
-            </td>
+    <div class="table-wrapper">
+        <table class="access">
+            <tr>
+                <th class="email-cell">email</th>
+                <th class="checkbox-cell">lil</th>
+                <th class="checkbox-cell">yus</th>
+            </tr>
+            {% for user in users %}
+            <tr>
+                <td class="email-cell">{{ user.email }}</td>
+                {% for i in range(2) %}
+                <td class="checkbox-cell">
+                    <input type="checkbox" onclick="toggleAuthorization({{ user.id }}, this.checked)"
+                           {% if admin_index != i %}disabled{% endif %}
+                           {% if (i == 0 and user.authorized0) or (i == 1 and user.authorized1) %}checked{% endif %}>
+                </td>
+                {% endfor %}
+            </tr>
             {% endfor %}
-        </tr>
-        {% endfor %}
-    </table>
-
+        </table>
+    </div>
     <script>
     function toggleAuthorization(userId, newState) {
         const xhr = new XMLHttpRequest();

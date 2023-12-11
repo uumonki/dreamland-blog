@@ -1,4 +1,12 @@
 document.addEventListener('DOMContentLoaded', function () {
+
+    function getLocalDate() {
+        var now = new Date();
+        var localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+        return localDate.toISOString().split("T")[0];
+    }
+
+    document.getElementById('date').value = getLocalDate();
     
     // Function to setup adjustable input for both number and date
     function setupAdjustableInput(elementId, min, max) {
@@ -28,45 +36,28 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         function stopAdjusting() {
-            if (initialPressTimer) clearTimeout(initialPressTimer);
-            if (adjustingInterval) clearInterval(adjustingInterval);
-            isAdjusting = false;
+            if (isAdjusting) {
+                if (initialPressTimer) clearTimeout(initialPressTimer);
+                if (adjustingInterval) clearInterval(adjustingInterval);
+                isAdjusting = false;
+            }   
         }
 
-        minusBtn.addEventListener('mousedown', function() {
+        function beginAdjusting(delta) {
             if (!isAdjusting) {
                 isAdjusting = true;
-                startInitialPress(-1);
+                startInitialPress(delta);
             }
-        });
-        minusBtn.addEventListener('touchstart', function(event) {
-            event.preventDefault(); // Prevents emulated mouse events
-            if (!isAdjusting) {
-                isAdjusting = true;
-                startInitialPress(-1);
-            }
-        });
+        }
+
+        minusBtn.addEventListener('mousedown', function() { beginAdjusting(-1) });
+        minusBtn.addEventListener('touchstart', function(event) { event.preventDefault(); beginAdjusting(-1) });
         
-        plusBtn.addEventListener('mousedown', function() {
-            if (!isAdjusting) {
-                isAdjusting = true;
-                startInitialPress(1);
-            }
-        });
-        plusBtn.addEventListener('touchstart', function(event) {
-            event.preventDefault(); // Prevents emulated mouse events
-            if (!isAdjusting) {
-                isAdjusting = true;
-                startInitialPress(1);
-            }
-        });
+        plusBtn.addEventListener('mousedown', function() { beginAdjusting(1) });
+        plusBtn.addEventListener('touchstart', function(event) { event.preventDefault(); beginAdjusting(1)});
         
-        document.addEventListener('mouseup', function() {
-            if (isAdjusting) stopAdjusting();
-        });
-        document.addEventListener('touchend', function(event) {
-            if (isAdjusting) stopAdjusting();
-        });        
+        document.addEventListener('mouseup', stopAdjusting);
+        document.addEventListener('touchend', stopAdjusting);
     }
 
     setupAdjustableInput('rating', 0, 30);
