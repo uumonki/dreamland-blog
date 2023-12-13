@@ -98,8 +98,7 @@ def requires_user_level(level):
         return wrapper
     return decorator
 
-# @requires_user_level(USER_LEVELS['visitor'])
-# TODO: remove comment
+@requires_user_level(USER_LEVELS['visitor'])
 def render_blog_posts():
     posts = BlogPost.query.order_by(BlogPost.date.desc()).all()
     
@@ -122,7 +121,6 @@ def render_blog_posts():
     return render_template('blog.html', posts=organized_posts, admin=admin)
 
 @app.route('/')
-# TODO: return to normal
 def homepage():
     user_level = get_user_level()
     if user_level == USER_LEVELS['logged_out']:
@@ -131,7 +129,6 @@ def homepage():
         return render_template('non_user.html')
     elif user_level >= USER_LEVELS['visitor']:
         return render_blog_posts()
-    return render_blog_posts()
 
 @app.route('/login')
 def login():
@@ -161,8 +158,7 @@ def logout():
     return redirect('/')
 
 @app.route('/create-post', methods=['GET', 'POST'])
-# @requires_user_level(USER_LEVELS['admin'])
-# TODO: remove comment
+@requires_user_level(USER_LEVELS['admin'])
 def create_post():
     if request.method == 'POST':
         data = request.form
@@ -220,7 +216,6 @@ def not_found(e):
   return "403 forbidden :(", 403
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True, host='0.0.0.0', port=5000, ssl_context='adhoc')
+    app.run()
+    # app.run(debug=True, host='0.0.0.0', port=5000, ssl_context='adhoc')
     # app.run(host='0.0.0.0', port=5000)
