@@ -124,13 +124,13 @@ def render_blog_posts():
 @app.route('/')
 # TODO: return to normal
 def homepage():
-    """ user_level = get_user_level()
+    user_level = get_user_level()
     if user_level == USER_LEVELS['logged_out']:
         return render_template('login.html')
     elif user_level == USER_LEVELS['non_user']:
         return render_template('non_user.html')
     elif user_level >= USER_LEVELS['visitor']:
-        return render_blog_posts() """
+        return render_blog_posts()
     return render_blog_posts()
 
 @app.route('/login')

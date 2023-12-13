@@ -44,7 +44,7 @@ function showPopup(el) {
     html2canvas(shareContentEl).then(canvas => {
         const croppedCanvas = document.createElement('canvas');
         const ctx = croppedCanvas.getContext('2d');
-        croppedCanvas.width = canvas.width - 1;
+        croppedCanvas.width = canvas.width - 3;
         croppedCanvas.height = canvas.height;
         ctx.drawImage(canvas, 0, 0, croppedCanvas.width, croppedCanvas.height, 0, 0, croppedCanvas.width, croppedCanvas.height);
 
