@@ -77,8 +77,8 @@
         {% endfor %}
     </div>
     {% endfor %}
-    <script src="{{ url_for('static', filename='date_today.js') }}"></script>
-    <script src="{{ url_for('static', filename='random_jump.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/date_today.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/random_jump.js') }}"></script>
 {% endblock %}
 
 {% block popup %}
@@ -96,5 +96,5 @@
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="{{ url_for('static', filename='popup.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/popup.js') }}"></script>
 {% endblock %}
