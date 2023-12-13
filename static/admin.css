@@ -204,6 +204,10 @@ input[type=checkbox]:checked:before {
 	color: #e2e2e0;
 }
 
+.btn-adjust, .btn-submit {
+	cursor: pointer;
+}
+
 .btn-text {
 	margin: 0;
 	padding: 0;

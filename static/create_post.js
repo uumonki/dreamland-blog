@@ -1,8 +1,9 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     function getLocalDate() {
-        var now = new Date();
-        var localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+        let now = new Date();
+        let localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+        localDate.setDate(localDate.getDate() - 1)
         return localDate.toISOString().split("T")[0];
     }
 

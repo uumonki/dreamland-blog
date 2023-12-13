@@ -8,8 +8,8 @@
     {% if admin %}
     <div class="entry">
         <div class="wrapper left">
-            <div class="date tomorrow"></div>
-            <div class="content"><a href="/create-post">add post.</a></div>
+            <div class="subtitle"><div class="date tomorrow"></div></div>
+            <div class="content">i kept <a href="/create-post" class="post-link">adding posts to the blog</a> until the memory couldn't hold all the posts at the same time. i had to come up with some wacky data structure.</div>
             <div class="conclusion">enjoyment: </div>
             <div class="icons">
                 <svg class="icon" viewBox="0 0 100 100"><path d="M65.14746,74.94336c-22.1416,0-40.09082-17.94922-40.09082-40.09082c0-14.93555,8.17285-27.9541,20.28516-34.85254 C19.90332,2.40332,0,23.81934,0,49.88672C0,77.56348,22.43652,100,50.11328,100C76.18066,100,97.5957,80.09668,100,54.6582 C93.10156,66.77051,80.08301,74.94336,65.14746,74.94336z"/></svg>
@@ -19,8 +19,8 @@
             <div class="conclusion">.</div>
         </div>
         <div class="wrapper right">
-            <div class="date tomorrow"></div>
-            <div class="content"><a href="/manage-access">manage access.</a></div>
+            <div class="subtitle"><div class="date tomorrow"></div></div>
+            <div class="content">i went to the mall and made friends with everyone there. i had to <a href="/manage-access" class="post-link">give them all access to the blog</a> since they threatened to unfriend me.</div>
             <div class="conclusion">enjoyment: </div>
             <div class="icons">
                 <svg class="icon" viewBox="0 0 100 100"><path d="M65.14746,74.94336c-22.1416,0-40.09082-17.94922-40.09082-40.09082c0-14.93555,8.17285-27.9541,20.28516-34.85254 C19.90332,2.40332,0,23.81934,0,49.88672C0,77.56348,22.43652,100,50.11328,100C76.18066,100,97.5957,80.09668,100,54.6582 C93.10156,66.77051,80.08301,74.94336,65.14746,74.94336z"/></svg>
@@ -32,7 +32,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             function formatDate(date) {
-                const monthNames = ["jan", "feb", "mar", "apr", "may", "june", "july", "aug", "sept", "oct", "nov", "dec"];
                 let day = date.getDate();
                 let monthIndex = date.getMonth();
                 let year = date.getFullYear();
@@ -53,12 +52,21 @@
     {% endif %}
     {% for date, posts in posts.items() %}
     <div class="entry">
+        <div class="anchor" id="{{ date }}"></div>
         {% for side in ['left', 'right'] %}
             {% if posts[side] %}
             {% set post = posts[side] %}
-            <div class="wrapper {{ side }}">
-                <div class="date">
-                    {{ date }}
+            <div class="wrapper shareable {{ side }}">
+                <div class="subtitle">
+                    {% if side == 'left' %}
+                    <svg viewBox="0 0 100 100" class="share-btn"><g transform="translate(0,-952.36218)"><path d="m 61.24557,973.37271 a 2.0001998,2.0001998 0 0 1 1.0312,0.4375 l 30,25 a 2.0001998,2.0001998 0 0 1 0,3.09379 l -30,25 a 2.0001998,2.0001998 0 0 1 -3.2812,-1.5313 l 0,-10.9687 c -5.3013,-0.052 -30.4724,0.5408 -48.6875,16.4687 a 2.0001998,2.0001998 0 0 1 -3.2186998,-2.125 C 15.44317,1003.0096 40.91917,991.69202 58.99557,986.87271 l 0,-11.5 a 2.0001998,2.0001998 0 0 1 2.25,-2 z m 1.75,6.25 0,8.75 a 2.0001998,2.0001998 0 0 1 -1.5,1.9375 c -15.8338,4.0084 -37.7687,13.32859 -47.7188,33.09379 20.5711,-13.8573 45.4525,-13.1187 47.3126,-13.0313 a 2.0001998,2.0001998 0 0 1 1.9062,2 l 0,8.6875 24.875,-20.6875 -24.875,-20.74999 z"/></g></svg>    
+                    {% endif %}
+                    <div class="date">
+                        {{ post.formatted_date }}
+                    </div>
+                    {% if side == 'right' %}
+                    <svg viewBox="0 0 100 100" class="share-btn"><g transform="translate(0,-952.36218)"><path d="m 61.24557,973.37271 a 2.0001998,2.0001998 0 0 1 1.0312,0.4375 l 30,25 a 2.0001998,2.0001998 0 0 1 0,3.09379 l -30,25 a 2.0001998,2.0001998 0 0 1 -3.2812,-1.5313 l 0,-10.9687 c -5.3013,-0.052 -30.4724,0.5408 -48.6875,16.4687 a 2.0001998,2.0001998 0 0 1 -3.2186998,-2.125 C 15.44317,1003.0096 40.91917,991.69202 58.99557,986.87271 l 0,-11.5 a 2.0001998,2.0001998 0 0 1 2.25,-2 z m 1.75,6.25 0,8.75 a 2.0001998,2.0001998 0 0 1 -1.5,1.9375 c -15.8338,4.0084 -37.7687,13.32859 -47.7188,33.09379 20.5711,-13.8573 45.4525,-13.1187 47.3126,-13.0313 a 2.0001998,2.0001998 0 0 1 1.9062,2 l 0,8.6875 24.875,-20.6875 -24.875,-20.74999 z"/></g></svg>    
+                    {% endif %}
                 </div>
                 <div class="content">
                     {{ post.content }}
@@ -75,4 +83,22 @@
         {% endfor %}
     </div>
     {% endfor %}
+{% endblock %}
+
+{% block popup %}
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <div class="popup-header">
+                <span class="popup-title">share post...</span>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div id="content-to-share"></div>
+            <div class="button-container">
+                <button id="copy-link-btn" class="copy-btn">copy link</button>
+                <button id="copy-image-btn" class="copy-btn">copy image</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="{{ url_for('static', filename='popup.js') }}"></script>
 {% endblock %}

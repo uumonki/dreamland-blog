@@ -98,36 +98,40 @@ def requires_user_level(level):
         return wrapper
     return decorator
 
-@requires_user_level(USER_LEVELS['visitor'])
+# @requires_user_level(USER_LEVELS['visitor'])
+# TODO: remove comment
 def render_blog_posts():
     posts = BlogPost.query.order_by(BlogPost.date.desc()).all()
     
     # Group posts by date
-    organized_posts = defaultdict(lambda: {'left': None, 'right': None})
+    organized_posts = defaultdict(lambda: {'date': None, 'left': None, 'right': None})
     for post in posts:
         # Formatting the date
+        date_id = post.date.replace('-', '')
         date_obj = datetime.strptime(post.date, '%Y-%m-%d')
         formatted_date = date_obj.strftime(f'%b {date_obj.day}, %Y').lower()
         formatted_date = formatted_date.replace('jun', 'june').replace('jul', 'july').replace('sep', 'sept')
 
         # Organizing posts by formatted date
         side = 'left' if not post.author else 'right'
-        if organized_posts[formatted_date][side] is None:
+        if organized_posts[date_id][side] is None:
             post.formatted_date = formatted_date
-            organized_posts[formatted_date][side] = post
+            organized_posts[date_id][side] = post
 
     admin = get_user_level() >= USER_LEVELS['admin']
     return render_template('blog.html', posts=organized_posts, admin=admin)
 
 @app.route('/')
+# TODO: return to normal
 def homepage():
-    user_level = get_user_level()
+    """ user_level = get_user_level()
     if user_level == USER_LEVELS['logged_out']:
         return render_template('login.html')
     elif user_level == USER_LEVELS['non_user']:
         return render_template('non_user.html')
     elif user_level >= USER_LEVELS['visitor']:
-        return render_blog_posts()
+        return render_blog_posts() """
+    return render_blog_posts()
 
 @app.route('/login')
 def login():
@@ -158,6 +162,7 @@ def logout():
 
 @app.route('/create-post', methods=['GET', 'POST'])
 # @requires_user_level(USER_LEVELS['admin'])
+# TODO: remove comment
 def create_post():
     if request.method == 'POST':
         data = request.form
@@ -217,5 +222,5 @@ def not_found(e):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=5000, ssl_context='adhoc')
     # app.run(host='0.0.0.0', port=5000)

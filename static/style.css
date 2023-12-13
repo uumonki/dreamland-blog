@@ -15,7 +15,7 @@ body {
 
 a {
 	text-decoration: none;
-	color: gray;
+	color: inherit;
 }
 
 .header {
@@ -25,7 +25,7 @@ a {
 	width: 100%;
 	height: 200px;
     background: linear-gradient(90deg, #303077 50%, #daffde 50%);
-	z-index: 100;
+	z-index: 1;
 }
 
 .header-left, .header-right {
@@ -91,6 +91,11 @@ a {
 	display: table;
 }
 
+.anchor {
+	position: relative;
+	bottom: 200px;
+}
+
 .wrapper {
 	width: calc(45% - 100px);
 	max-width: 550px;
@@ -116,27 +121,179 @@ a {
 	transform: translateX(50vw)
 }
 
+.subtitle {
+	margin-bottom: 15px;
+	height: 27px;
+	display: flex;
+	align-items: flex-end;
+}
+
+.left .subtitle {
+	justify-content: flex-end;
+}
+
 .date {
 	font-size: 16pt;
-	margin-bottom: 15px;
+	bottom: 0;
+}
+
+.share-btn {
+	display: none;
+	margin: 0 10px 1px 10px;
+	height: 27px;
+	cursor: pointer;
+}
+
+.post-link {
+	text-decoration: underline dashed 1px;
 }
 
 .conclusion {
 	font-style: italic;
 	letter-spacing: 0.5px;
 	display: inline-block;
-	margin-top: 12px;
+	margin-top: 15px;
 }
 
 .icons {
 	display: inline-block;
-	margin: 0px 3px;
-	transform: translateY(3px);
+	margin: 0px 2px;
+	transform: translateY(2.5px);
 }
 
 .icon {
-	width: 20px;
-	margin-left: 2px;
+	width: 19px;
+	margin-left: 1.5px;
+}
+
+/* popup */
+
+.popup {
+	display: none;
+	position: fixed;
+	z-index: 1;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	min-height: 100%;
+	overscroll-behavior-y: none;
+	overflow: auto;
+	background-color: rgba(0,0,0,0.4);
+}
+
+.popup-content {
+	position: fixed;
+	top: 47%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: #f7f7f7;
+	color: #141414;
+	margin: auto;
+	padding: 30px;
+	width: 70%;
+	max-width: 650px;
+	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+}
+  
+.popup-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.popup-title {
+	margin-left: 7px;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.close-btn {
+	color: #aaa;
+	font-size: 28px;
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+	color: #141414;
+}
+
+#content-to-share {
+	margin: 20px 0;
+	padding: 21px 23px 23px 25px;
+	border: none;
+	max-height: 50vh;
+	overflow: auto;
+}
+
+.left-share  {
+	color: #daffde;
+	fill: #daffde;
+	border: 1px solid #303077;
+	background-color: #303077;
+}
+
+.right-share {
+	color: #303077;
+	fill: #303077;
+	border: 1px solid #daffde;
+	background-color: #daffde;
+}
+
+.button-container {
+	display: flex;
+	justify-content: left;
+	margin-bottom: 3px;
+}
+
+.copy-btn {
+	-webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+	cursor: pointer;
+	font-family: inherit;
+	font-size: inherit;
+	background: transparent;
+	padding: 8px 12px;
+	border: none;
+	color: #141414;
+	margin: -5px 10px 0px 0px;
+}
+
+.copy-btn:hover {
+	background-color: #ccc;
+}
+
+.copy-btn:active {
+	background-color: #aaa;
+}
+
+.copy-btn:disabled {
+	background: none;
+	cursor: default;
+}
+
+/* Add responsive design for small screens */
+  
+
+@media (hover: hover) {
+	.wrapper:hover .share-btn {
+		display: inline;
+	}
+}
+
+@media (hover: none)  {
+	body {
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+		-webkit-tap-highlight-color: rgba(0,0,0,0);
+	}
 }
 
 @media only screen and (max-width: 992px) {
@@ -156,6 +313,10 @@ a {
 		margin-bottom: 50px;
 	}
 
+	.anchor {
+		bottom: 180px;
+	}
+
 	.wrapper {
 		width: calc(45% - 80px);
 		padding: 0px 40px;
@@ -165,17 +326,25 @@ a {
 		font-size: 13pt;
 	}
 
+	.subtitle {
+		height: 22px;
+	}
+
 	.date {
 		font-size: 13pt;
 	}
 
+	.share-btn {
+		height: 22px;
+	}
+
 	.icons {
-		transform: translateY(2.5px);
+		transform: translateY(2px);
 	}
 
 	.icon {
-		width: 17px;
-		margin-left: 1.5px;
+		width: 16px;
+		margin-left: 1px;
 	}
 }
 
@@ -197,7 +366,11 @@ a {
 	}
 	
 	.entry {
-		margin-bottom: 30px;
+		margin-bottom: 40px;
+	}
+
+	.anchor {
+		bottom: 150px;
 	}
 
 	.wrapper {
@@ -209,17 +382,26 @@ a {
 		font-size: 11pt;
 	}
 
+	.subtitle {
+		height: 18px;
+	}
+
 	.date {
 		font-size: 11pt;
 	}
 
+	.share-btn {
+		margin: 0 8px 1px 8px;
+		height: 18px;
+	}
+
 	.icons {
-		transform: translateY(2px);
+		transform: translateY(1.5px);
 	}
 
 	.icon {
-		width: 15px;
-		margin-left: 1px;
+		width: 14px;
+		margin-left: 0.5px;
 	}
 }
 
