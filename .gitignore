@@ -1,4 +1,5 @@
 .env
+utils/migrate.py
 **/*.db
 **/*.sqlite
 **/*.sqlite3

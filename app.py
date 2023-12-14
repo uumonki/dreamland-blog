@@ -1,23 +1,34 @@
-from flask import Flask, render_template, session, redirect, url_for, request, jsonify, abort
 from authlib.integrations.flask_client import OAuth
+from flask import Flask, render_template, session, redirect, url_for, request, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
+from google.oauth2 import id_token
+from google.auth.transport import requests
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import validates
 
 from collections import defaultdict
 from datetime import datetime
 from functools import wraps
+
 import os
 
 from dotenv import load_dotenv
 load_dotenv()
 
+# TODO: requirements.txt
+
 app = Flask(__name__)
 app.secret_key = os.getenv('FLASK_SECRET_KEY')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=True,
+    SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URI')
+)
 db = SQLAlchemy(app)
 
-ADMIN_EMAILS = os.getenv('ADMIN_EMAILS').split(',')
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 
+ADMIN_EMAILS = os.getenv('ADMIN_EMAILS').split(',')
 USER_LEVELS = {
     'logged_out': 0,
     'non_user': 1,
@@ -25,11 +36,13 @@ USER_LEVELS = {
     'admin': 3
 }
 
+posts_cache = None
+
 class BlogPost(db.Model):
     __tablename__ = 'entries'
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     author = db.Column(db.Boolean, nullable=False)
-    date = db.Column(db.Text, nullable=False)  
+    _date = db.Column('date', db.Date, nullable=False, index=True)
     content = db.Column(db.Text, nullable=False)
     rating = db.Column(db.Integer, nullable=False)
 
@@ -43,14 +56,42 @@ class BlogPost(db.Model):
         assert content.strip()
         return content
     
-    @validates('date')
-    def validate_date(self, key, date):
-        return datetime.strptime(date, '%Y-%m-%d').date()
+    @hybrid_property
+    def date(self):
+        return self._date.strftime('%Y-%m-%d')
+
+    @date.setter
+    def date(self, value):
+        self._date = datetime.strptime(value, '%Y-%m-%d').date()
+
+    @hybrid_property
+    def formatted_date(self):
+        formatted = self._date.strftime(f'%b {self._date.day}, %Y').lower()
+        return formatted.replace('jun', 'june').replace('jul', 'july').replace('sep', 'sept')
+
+    @hybrid_property
+    def side(self):
+        return 'left' if not self.author else 'right'
+
+    @classmethod
+    def get_organized_posts(cls):
+        posts = cls.query.order_by(cls._date.desc()).all()
+        organized_posts = defaultdict(lambda: {'date': None, 'left': None, 'right': None})
+        for post in posts:
+            date_id = post.date.replace('-', '')
+            side = post.side
+            if organized_posts[date_id][side] is None:
+                organized_posts[date_id]['date'] = post.formatted_date
+                organized_posts[date_id][side] = post
+        return organized_posts
+
 
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True, nullable=False)
+    google_id = db.Column(db.String(256), unique=True, nullable=False, index=True)
+    name = db.Column(db.String(256), nullable=False)
+    email = db.Column(db.String(256), unique=True, nullable=False)
     authorized0 = db.Column(db.Boolean, nullable=False)
     authorized1 = db.Column(db.Boolean, nullable=False)
 
@@ -67,21 +108,35 @@ google = oauth.register(
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
 )
 
-def get_or_create_user_in_database(user_email):
-    user = User.query.filter_by(email=user_email).first()
+def get_user(google_id):
+    return User.query.filter_by(google_id=google_id).first()
+
+def create_or_update_user(google_id, user_email, user_name):
+    if user_name is None:
+        user_name = ''
+    user = get_user(google_id)
     if user is None:
-        user = User(email=user_email, authorized0=False, authorized1=False)
+        user = User(
+            google_id=google_id,
+            email=user_email,
+            name=user_name,
+            authorized0=False,
+            authorized1=False
+        )
         db.session.add(user)
-        db.session.commit()
+    else:
+        user.email = user_email
+        user.name = user_name
+    db.session.commit()
     return user
 
 def get_user_level():
-    user_email = session.get('user_email')
-    if user_email is None:
+    user_id = session.get('user_id')
+    if user_id is None:
         return USER_LEVELS['logged_out']
-    user = get_or_create_user_in_database(user_email)
-    if user_email in ADMIN_EMAILS:
+    if user_id in ADMIN_EMAILS:
         return USER_LEVELS['admin']
+    user = get_user(user_id)
     if user.authorized0 and user.authorized1:
         return USER_LEVELS['visitor']
     else:
@@ -92,33 +147,36 @@ def requires_user_level(level):
         @wraps(func)
         def wrapper(*args, **kwargs):
             user_level = get_user_level()
+            if user_level == USER_LEVELS['logged_out']:
+                return redirect('/login')
             if user_level < level:
                 abort(403)
             return func(*args, **kwargs)
         return wrapper
     return decorator
 
-@requires_user_level(USER_LEVELS['visitor'])
+def get_organized_posts():
+    global posts_cache
+    if posts_cache is None:
+        posts_cache = BlogPost.get_organized_posts()
+    return posts_cache
+
+def clear_posts_cache():
+    global posts_cache
+    posts_cache = None
+
 def render_blog_posts():
-    posts = BlogPost.query.order_by(BlogPost.date.desc()).all()
-    
-    # Group posts by date
-    organized_posts = defaultdict(lambda: {'date': None, 'left': None, 'right': None})
-    for post in posts:
-        # Formatting the date
-        date_id = post.date.replace('-', '')
-        date_obj = datetime.strptime(post.date, '%Y-%m-%d')
-        formatted_date = date_obj.strftime(f'%b {date_obj.day}, %Y').lower()
-        formatted_date = formatted_date.replace('jun', 'june').replace('jul', 'july').replace('sep', 'sept')
-
-        # Organizing posts by formatted date
-        side = 'left' if not post.author else 'right'
-        if organized_posts[date_id][side] is None:
-            post.formatted_date = formatted_date
-            organized_posts[date_id][side] = post
-
+    organized_posts = get_organized_posts()
     admin = get_user_level() >= USER_LEVELS['admin']
     return render_template('blog.html', posts=organized_posts, admin=admin)
+
+@app.after_request
+def set_security_headers(response):
+    response.headers['Content-Security-Policy'] = "default-src 'self';"
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    return response
 
 @app.route('/')
 def homepage():
@@ -142,19 +200,18 @@ def authorize():
     google = oauth.create_client('google')
     try:
         token = google.authorize_access_token()
+        id_info = id_token.verify_oauth2_token(token['id_token'], requests.Request(), GOOGLE_CLIENT_ID)
+        session['user_id'] = create_or_update_user(id_info['sub'], id_info['email'], id_info.get('name')).google_id
     except Exception as e:
         # Log the error and inform the user
         print(f"Authentication error: {e}")
         # something like https://idp.shibboleth.ox.ac.uk/idp/profile/SAML2/Redirect/SSO?execution=e1s1
         return render_template('error/auth_error.html'), 400
-
-    user_info = google.get('userinfo').json()
-    session['user_email'] = user_info.get('email')
     return redirect('/')
 
 @app.route('/logout')
 def logout():
-    session.pop('user_email', None)
+    session.pop('user_id', None)
     return redirect('/')
 
 @app.route('/create-post', methods=['GET', 'POST'])
@@ -162,7 +219,7 @@ def logout():
 def create_post():
     if request.method == 'POST':
         data = request.form
-        author = ADMIN_EMAILS.index(session.get('user_email')) != 0
+        author = ADMIN_EMAILS.index(session['user_id']) != 0
         try:
             new_post = BlogPost(
                 author=author,
@@ -170,19 +227,20 @@ def create_post():
                 content=data.get('text'),
                 date=data.get('date')
             )
+            clear_posts_cache()
+            db.session.add(new_post)
+            db.session.commit()
+            return redirect('/')
         except Exception as e:
+            db.session.rollback()
             print(f"Error creating post: {e}")
             return redirect('/')
-        db.session.add(new_post)
-        db.session.commit()
-        return redirect('/')
-
     return render_template('admin/create_post.html')
 
 @app.route('/manage-access')
 @requires_user_level(USER_LEVELS['admin'])
 def manage_access():
-    admin_index = ADMIN_EMAILS.index(session.get('user_email'))
+    admin_index = ADMIN_EMAILS.index(session['user_id'])
 
     search_query = request.args.get('search_email', '')
     users = User.query.filter(User.email.contains(search_query)).all()
@@ -192,7 +250,7 @@ def manage_access():
 @app.route('/update-authorization', methods=['POST'])
 @requires_user_level(USER_LEVELS['admin'])
 def update_authorization():
-    admin_index = ADMIN_EMAILS.index(session.get('user_email'))
+    admin_index = ADMIN_EMAILS.index(session['user_id'])
 
     data = request.json
     user_id = data['userId']
@@ -216,6 +274,6 @@ def not_found(e):
   return "403 forbidden :(", 403
 
 if __name__ == '__main__':
-    app.run()
-    # app.run(debug=True, host='0.0.0.0', port=5000, ssl_context='adhoc')
-    # app.run(host='0.0.0.0', port=5000)
+    with app.app_context():
+        db.create_all()
+    app.run(host='0.0.0.0', port=5000, ssl_context='adhoc')

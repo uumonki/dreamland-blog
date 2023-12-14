@@ -17,7 +17,7 @@ class BlogPost(Base):
     content = Column(Text, nullable=False)
     rating = Column(Integer, nullable=False)
 
-engine = create_engine('sqlite:///instance/example.db')  # Path to your .db file
+engine = create_engine('sqlite:///instance/example.db')
 Session = sessionmaker(bind=engine)
 session = Session()
 
