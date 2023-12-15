@@ -3,17 +3,9 @@ const popupEl = document.getElementById('popup')
 const copyLinkBtnEl = document.getElementById('copy-link-btn');
 const copyImgBtnEl = document.getElementById('copy-image-btn')
 const shareContentEl = document.getElementById('content-to-share');
-// monthNames declared in blog.html
+// formatDateFromNumber declared in date.js
 
 var imgBlob = null;
-
-// function that converts yyyymmdd to MMM (d)d, yyyy
-function formatDateFromNumber(yyyymmdd) {
-    const year = yyyymmdd.substring(0, 4);
-    const month = yyyymmdd.substring(4, 6);
-    const day = yyyymmdd.substring(6, 8);
-    return `${monthNames[parseInt(month) - 1]} ${parseInt(day, 10)}, ${year}`;
-}
 
 function showPopup(el) {
     // show popup for wrapper closest to el

@@ -6,7 +6,6 @@
     <title>dreamland - a dream blog</title>
     <link rel="icon" href="{{ url_for('static', filename='icon.ico') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script>const monthNames = ["jan", "feb", "mar", "apr", "may", "june", "july", "aug", "sept", "oct", "nov", "dec"];</script>
 </head>
 <body>
     <div class="header">
@@ -32,4 +31,5 @@
     </div>
     {% block popup %}{% endblock %}
 </body>
+<script src="{{ url_for('static', filename='scripts/date.js') }}"></script>
 </html>

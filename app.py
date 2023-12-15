@@ -56,6 +56,12 @@ class BlogPost(db.Model):
         assert content.strip()
         return content
     
+    @validates('_date')
+    def validate_date(self, key, date):
+        if isinstance(date, str):
+            return datetime.strptime(date, '%Y-%m-%d').date()
+        return date
+
     @hybrid_property
     def date(self):
         return self._date.strftime('%Y-%m-%d')
@@ -94,6 +100,10 @@ class User(db.Model):
     email = db.Column(db.String(256), unique=True, nullable=False)
     authorized0 = db.Column(db.Boolean, nullable=False)
     authorized1 = db.Column(db.Boolean, nullable=False)
+
+    @hybrid_property
+    def both_authorized(self):
+        return self.authorized0 and self.authorized1
 
 # OAuth 2 client setup
 oauth = OAuth(app)
@@ -137,7 +147,7 @@ def get_user_level():
     if user_id in ADMIN_EMAILS:
         return USER_LEVELS['admin']
     user = get_user(user_id)
-    if user.authorized0 and user.authorized1:
+    if user.both_authorized:
         return USER_LEVELS['visitor']
     else:
         return USER_LEVELS['non_user']
@@ -225,7 +235,8 @@ def create_post():
                 author=author,
                 rating=int(data.get('rating')),
                 content=data.get('text'),
-                date=data.get('date')
+                _date=data.get('date')
+                # why isn't date= working??
             )
             clear_posts_cache()
             db.session.add(new_post)
