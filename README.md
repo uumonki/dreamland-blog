@@ -1,7 +1,9 @@
 # dreamland-blog
 
 ## Overview
-This project is a Flask-based web application created for myself and a friend to log & compare our dreams. It features a dual narrative layout where dreams are displayed side by side on a vertical timeline. The front end is implemented using pure CSS and JavaScript since the small scale of the project does not necessitate more complex frameworks. Google OAuth is used for user authentication, and SQLite is used to store blog posts and user data. 
+This project is a Flask-based web application created for myself and a friend to log & compare our dreams. It features a dual narrative layout where dreams are displayed side by side on a vertical timeline. The front end is implemented using pure CSS and JavaScript since the small scale of the project does not necessitate more complex frameworks. Google OAuth is used for user authentication, and SQLite is used to store blog posts and user data. Other external resources include [`html2canvas`](https://html2canvas.hertzen.com/) and [`long-press-event`](https://github.com/john-doherty/long-press-event).
+
+Please note that this project is not optimized for UX. The audience is quite limited, and having users "scavenger hunt" through the UI encourages them to read the text in its entirety.
 
 ## Getting Started
 This blog application can be adapted for other dual narrative projects or as a template for individual blogs. To run the app locally, follow these steps.
