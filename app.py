@@ -182,7 +182,7 @@ def render_blog_posts():
 
 @app.after_request
 def set_security_headers(response):
-    response.headers['Content-Security-Policy'] = "default-src 'self';"
+    response.headers['Content-Security-Policy'] = "default-src 'self'; img-src 'self' data: http://w3.org/2000/svg;"
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
@@ -281,8 +281,12 @@ def not_found(e):
   return "404 not found :(", 404
 
 @app.errorhandler(403)
-def not_found(e):
+def forbidden(e):
   return "403 forbidden :(", 403
+
+@app.errorhandler(500)
+def internal(e):
+    return "500 internal server error :(", 500
 
 if __name__ == '__main__':
     with app.app_context():
