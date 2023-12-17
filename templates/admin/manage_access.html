@@ -29,7 +29,7 @@
                 <td class="email-cell">{{ user.email }}</td>
                 {% for i in range(2) %}
                 <td class="checkbox-cell">
-                    <input type="checkbox" onclick="toggleAuthorization({{ user.id }}, this.checked)"
+                    <input type="checkbox" data-user-id="{{ user.id }}"
                            {% if admin_index != i %}disabled{% endif %}
                            {% if (i == 0 and user.authorized0) or (i == 1 and user.authorized1) %}checked{% endif %}>
                 </td>

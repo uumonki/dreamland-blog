@@ -11,3 +11,10 @@ function toggleAuthorization(userId, newState) {
     }
     xhr.send(JSON.stringify({userId: userId, newState: newState}));
 }
+
+const checkboxes = document.querySelectorAll('input[type="checkbox"]:not(:disabled)');
+checkboxes.forEach(checkbox => {
+    checkbox.onclick = function() {
+        toggleAuthorization(this.getAttribute('data-user-id'), this.checked);
+    };
+});
